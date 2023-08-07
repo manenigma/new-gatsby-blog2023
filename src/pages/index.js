@@ -1,12 +1,15 @@
 import * as React from "react"
-import { Link } from "gatsby"
-import { StaticImage } from "gatsby-plugin-image"
+import { Link, graphql } from "gatsby"
+// import { StaticImage } from "gatsby-plugin-image"
 
 import Layout from "../components/layout"
 import Seo from "../components/seo"
-import * as styles from "../components/index.module.css"
+// import * as styles from "../components/index.module.css"
 
-const links = [
+import styled from "styled-components";
+
+
+/* const links = [
   {
     text: "Tutorial",
     url: "https://www.gatsbyjs.com/docs/tutorial",
@@ -67,62 +70,68 @@ const moreLinks = [
   { text: "Issues", url: "https://github.com/gatsbyjs/gatsby/issues" },
 ]
 
-const utmParameters = `?utm_source=starter&utm_medium=start-page&utm_campaign=default-starter`
+const utmParameters = `?utm_source=starter&utm_medium=start-page&utm_campaign=default-starter` */
 
-const IndexPage = () => (
-  <Layout>
-    <div className={styles.textCenter}>
-      <StaticImage
-        src="../images/example.png"
-        loading="eager"
-        width={64}
-        quality={95}
-        formats={["auto", "webp", "avif"]}
-        alt=""
-        style={{ marginBottom: `var(--space-3)` }}
-      />
-      <h1>
-        Welcome to <b>Gatsby!</b>
-      </h1>
-      <p className={styles.intro}>
-        <b>Example pages:</b>{" "}
-        {samplePageLinks.map((link, i) => (
-          <React.Fragment key={link.url}>
-            <Link to={link.url}>{link.text}</Link>
-            {i !== samplePageLinks.length - 1 && <> · </>}
-          </React.Fragment>
-        ))}
-        <br />
-        Edit <code>src/pages/index.js</code> to update this page.
-      </p>
-    </div>
-    <ul className={styles.list}>
-      {links.map(link => (
-        <li key={link.url} className={styles.listItem}>
-          <a
-            className={styles.listItemLink}
-            href={`${link.url}${utmParameters}`}
-          >
-            {link.text} ↗
-          </a>
-          <p className={styles.listItemDescription}>{link.description}</p>
-        </li>
-      ))}
-    </ul>
-    {moreLinks.map((link, i) => (
-      <React.Fragment key={link.url}>
-        <a href={`${link.url}${utmParameters}`}>{link.text}</a>
-        {i !== moreLinks.length - 1 && <> · </>}
-      </React.Fragment>
-    ))}
-  </Layout>
-)
+const BlogLink = styled(Link)`
+  text-decoration: none; 
+`
+
+const BlogTitle = styled.h3`
+  margin-bottom: 20px;
+  color: blur;
+`
+
+const IndexPage = ({ data }) => {
+  console.log(data);
+
+  return (
+    <Layout>
+      <Seo title="Home" />
+      <div>
+        <h1>ENiGMA Thoughts</h1>
+        <h4>{data.allMarkdownRemark.totalCount}</h4>
+        {
+          data.allMarkdownRemark.edges.map(({ node }) => (
+            <div key={node.id}>
+              <BlogLink to={node.fields.slug}>
+                <BlogTitle>{node.frontmatter.title} - {node.frontmatter.date}</BlogTitle>
+              </BlogLink>
+              <p>{node.excerpt}</p>
+            </div>
+          ))
+        }
+      </div>
+
+    </Layout>
+  )
+}
 
 /**
  * Head export to define metadata for the page
  *
  * See: https://www.gatsbyjs.com/docs/reference/built-in-components/gatsby-head/
  */
-export const Head = () => <Seo title="Home" />
+// export const Head = () => <Seo title="Home" />
 
 export default IndexPage
+
+export const query = graphql`
+{
+  allMarkdownRemark(sort: {frontmatter: {date: DESC}}) {
+    totalCount
+    edges {
+      node {
+        excerpt
+        frontmatter {
+          title
+          date
+          description
+        }
+        fields {
+          slug
+        }
+      }
+    }
+  }
+}
+`
